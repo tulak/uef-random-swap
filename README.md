@@ -1,2 +1,1 @@
-# uef-random-swap
-Random swap algorythm
+## Random swap clustering algorithm implementation 
