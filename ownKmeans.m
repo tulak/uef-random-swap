@@ -1,8 +1,8 @@
 % Author: Filip Zachar (2017)
 
-function [ clusterLabels, clusterCentroids, totalSquaredError, iterations, kData ] = ownKmeans(data, centroids, distanceFn, maxIterations, kData)
-    if exist('kData', 'var')
-      
+function [ clusterLabels, clusterCentroids, totalSquaredError, iterations, kData ] = ownKmeans(data, centroids, distanceFn, maxIterations)
+    if isstruct(data)
+      kData = data;
     else        
         [nVectors, nFeatures] = size(data);
         nClusters = size(centroids, 1);

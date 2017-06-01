@@ -11,31 +11,28 @@ function [retPartitions, retCentroids, retError, acceptedSwaps, elapsedTime] = r
     if ~exist('swaps', 'var'), swaps = 30; end
     %%% Set default distance function
     if ~exist('distanceFn', 'var'), distanceFn = @euclideanDistance; end
-    %%% Set default kmeans iteration limit to infinity (let kmeans converge)
-    if ~exist('kmeansIterationLimit', 'var'), kmeansIterationLimit = inf; end
+    %%% Set default kmeans iteration limit to 2
+    if ~exist('kmeansIterationLimit', 'var'), kmeansIterationLimit = 2; end
     
     [nVectors, nFeatures] = size(data);
     
     %%% Initial centroid selection method
     centroids = randomCentroids(data, nClusters);
-    %centroids = randomSyntheticCentroids(data, nClusters);    
-    %centroids = randomClusterCentroids(data, nClusters);   
+    % centroids = randomSyntheticCentroids(data, nClusters);    
+    % centroids = randomClusterCentroids(data, nClusters);   
     
     acceptedSwaps = 0;
-    [partitions, centroids, error, iterations, kData] = ownKmeans(data, centroids, distanceFn);
+    [partitions, centroids, error, iterations, kData] = ownKmeans(data, centroids, distanceFn, 2);
     
     for swapN = 1:swaps
-%         logPicture(swapN, kData);
-%        display(['Static: ' num2str(sum(kData.staticCentroidsMap))]);
        originalCentroids = kData.centroids;
        originalStaticCentroidsmap = kData.staticCentroidsMap;
-%        kData.staticCentroidsMap = repmat(1, kData.nClusters, 1);
+
        swappedkData = swapCentroids(kData); 
        kData = swappedkData;
-%        logPicture([num2str(swapN) '-swapped'], kData);
        
-       [newPartitions, newCentroids, newError, newIterations, newkData] = ownKmeans(0, 0, 0, 0, kData);
-%        logPicture([num2str(swapN) '-Zkmeans'], newkData);
+       [newPartitions, newCentroids, newError, newIterations, newkData] = ownKmeans(kData);
+
        if newError < error
           partitions = newPartitions;
           centroids = newCentroids;
@@ -61,7 +58,7 @@ function [RkData] = swapCentroids(kData)
     sacrificeID = randi(kData.nClusters);
     kData.staticCentroidsMap(sacrificeID) = 0;
     
-    newCentroid = randomSyntheticCentroids(kData.data, 1);
+    newCentroid = randomCentroids(kData.data, 1);
     kData.centroids(sacrificeID, :) = newCentroid;
     RkData = kData;
 end
